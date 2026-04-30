@@ -19,11 +19,12 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from .config import Config
-from .extractor import extract_all
-from .snowflake_io import (
+from config import Config
+from extractor import extract_all
+from snowflake_io import (
     connect,
     copy_into_target,
+    get_session_info,
     list_candidate_queries,
     put_shards_to_stage,
     remove_stage_files,
@@ -50,6 +51,7 @@ async def run_pipeline(cfg: Config) -> PipelineReport:
     # Step 1: candidates — short-lived connection, single sync query.
     list_conn = connect(cfg)
     try:
+        log.info(get_session_info(list_conn))
         candidates = list_candidate_queries(list_conn, cfg)
     finally:
         list_conn.close()
