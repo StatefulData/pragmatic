@@ -1,0 +1,440 @@
+QUERY_ID	STEP_ID	OPERATOR_ID	PARENT_OPERATORS	OPERATOR_TYPE	OPERATOR_STATISTICS	EXECUTION_TIME_BREAKDOWN	OPERATOR_ATTRIBUTES
+01c4125a-0308-3e07-0003-9ca2003351ea	1	0		Result	"{
+  ""input_rows"": 271,
+  ""io"": {
+    ""bytes_written_to_result"": 29583
+  }
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""expressions"": [
+    ""LH.EVENT_ID"",
+    ""LH.EVENT_TIMESTAMP"",
+    ""LH.CLIENT_IP"",
+    ""LH.REPORTED_CLIENT_TYPE"",
+    ""LH.REPORTED_CLIENT_VERSION"",
+    ""S.SESSION_ID"",
+    ""S.USER_NAME"",
+    ""S.CLIENT_APPLICATION_ID"",
+    ""S.CLIENT_ENVIRONMENT"",
+    ""OBJECT_CONSTRUCT('succeeded_queries', SYS_VW.SUCCEEDED_QUERIES_3, 'failed_queries', SYS_VW.FAILED_QUERIES_1, 'total_elapsed_time', SYS_VW.TOTAL_ELAPSED_TIME_4, 'execution_time', SYS_VW.EXECUTION_TIME_0)"",
+    ""OBJECT_CONSTRUCT('succeeded_queries', SYS_VW.SUCCEEDED_QUERIES_5, 'failed_queries', SYS_VW.FAILED_QUERIES_1, 'total_elapsed_time', SYS_VW.TOTAL_ELAPSED_TIME_6, 'execution_time', SYS_VW.EXECUTION_TIME_0, 'query_id_with_max_execution_time', SYS_VW.QUERY_ID_WITH_MAX_EXECUTION_TIME_2)"",
+    ""SYS_VW.QUERY_LIST_3""
+  ]
+}"
+01c4125a-0308-3e07-0003-9ca2003351ea	1	1	"[
+  0
+]"	Sort	"{
+  ""input_rows"": 271,
+  ""output_rows"": 271
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""sort_keys"": [
+    ""LH.EVENT_TIMESTAMP ASC NULLS LAST"",
+    ""S.SESSION_ID ASC NULLS LAST""
+  ]
+}"
+01c4125a-0308-3e07-0003-9ca2003351ea	1	2	"[
+  1
+]"	Join	"{
+  ""input_rows"": 325,
+  ""output_rows"": 271
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""equality_join_condition"": ""(S.LOGIN_EVENT_ID = LH.EVENT_ID)"",
+  ""join_type"": ""INNER""
+}"
+01c4125a-0308-3e07-0003-9ca2003351ea	1	3	"[
+  2
+]"	Join	"{
+  ""input_rows"": 731,
+  ""output_rows"": 280
+}"	"{
+  ""overall_percentage"": 4.761904761904762e-02,
+  ""processing"": 4.761904761904762e-02
+}"	"{
+  ""equality_join_condition"": ""(SYS_VW.SESSION_ID_4 = S.SESSION_ID)"",
+  ""join_type"": ""LEFT OUTER""
+}"
+01c4125a-0308-3e07-0003-9ca2003351ea	1	4	"[
+  3
+]"	Aggregate	"{
+  ""input_rows"": 3103,
+  ""output_rows"": 451
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""functions"": [
+    ""SUM(IFF(QUERY_HISTORY.ERROR_CODE IS NULL, 1, 0))"",
+    ""SUM(IFF(QUERY_HISTORY.ERROR_CODE IS NOT NULL, 1, 0))"",
+    ""SUM(QUERY_HISTORY.TOTAL_ELAPSED_TIME)"",
+    ""SUM(QUERY_HISTORY.EXECUTION_TIME)"",
+    ""MAX_BY(QUERY_HISTORY.QUERY_ID, QUERY_HISTORY.EXECUTION_TIME)"",
+    ""ARRAY_AGG(OBJECT_CONSTRUCT('QUERY_ID', QUERY_HISTORY.QUERY_ID, 'QUERY_TEXT', QUERY_HISTORY.QUERY_TEXT, 'DATABASE_ID', QUERY_HISTORY.DATABASE_ID, 'DATABASE_NAME', QUERY_HISTORY.DATABASE_NAME, 'SCHEMA_ID', QUERY_HISTORY.SCHEMA_ID, 'SCHEMA_NAME', QUERY_HISTORY.SCHEMA_NAME, 'QUERY_TYPE', QUERY_HISTORY.QUERY_TYPE, 'SESSION_ID', QUERY_HISTORY.SESSION_ID, 'AUTHN_EVENT_ID', QUERY_HISTORY.AUTHN_EVENT_ID, 'USER_NAME', QUERY_HISTORY.USER_NAME, 'ROLE_NAME', QUERY_HISTORY.ROLE_NAME, 'WAREHOUSE_ID', QUERY_HISTORY.WAREHOUSE_ID, 'WAREHOUSE_NAME', QUERY_HISTORY.WAREHOUSE_NAME, 'WAREHOUSE_SIZE', QUERY_HISTORY.WAREHOUSE_SIZE, 'WAREHOUSE_TYPE', QUERY_HISTORY.WAREHOUSE_TYPE, 'CLUSTER_NUMBER', QUERY_HISTORY.CLUSTER_NUMBER, 'QUERY_TAG', QUERY_HISTORY.QUERY_TAG, 'EXECUTION_STATUS', QUERY_HISTORY.EXECUTION_STATUS, 'ERROR_CODE', QUERY_HISTORY.ERROR_CODE, 'ERROR_MESSAGE', QUERY_HISTORY.ERROR_MESSAGE, 'START_TIME', QUERY_HISTORY.START_TIME, 'END_TIME', QUERY_HISTORY.END_TIME, 'TOTAL_ELAPSED_TIME', QUERY_HISTOR...""
+  ],
+  ""grouping_keys"": [
+    ""QUERY_HISTORY.SESSION_ID""
+  ]
+}"
+01c4125a-0308-3e07-0003-9ca2003351ea	1	5	"[
+  4
+]"	SecureView	"{
+  ""output_rows"": 3103
+}"	"{
+  ""overall_percentage"": 5.714285714285714e-01,
+  ""processing"": 3.333333333333333e-01,
+  ""remote_disk_io"": 7.142857142857142e-02,
+  ""synchronization"": 1.666666666666667e-01
+}"	{}
+01c4125a-0308-3e07-0003-9ca2003351ea	1	6	"[
+  3
+]"	Join	"{
+  ""input_rows"": 925,
+  ""output_rows"": 280
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""equality_join_condition"": ""(SYS_VW.SESSION_ID_2 = S.SESSION_ID)"",
+  ""join_type"": ""LEFT OUTER""
+}"
+01c4125a-0308-3e07-0003-9ca2003351ea	1	7	"[
+  6
+]"	Aggregate	"{
+  ""input_rows"": 8349,
+  ""output_rows"": 645
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""functions"": [
+    ""SUM(IFF(QUERY_HISTORY.ERROR_CODE IS NULL, 1, 0))"",
+    ""SUM(IFF(QUERY_HISTORY.ERROR_CODE IS NOT NULL, 1, 0))"",
+    ""SUM(QUERY_HISTORY.TOTAL_ELAPSED_TIME)"",
+    ""SUM(QUERY_HISTORY.EXECUTION_TIME)""
+  ],
+  ""grouping_keys"": [
+    ""QUERY_HISTORY.SESSION_ID""
+  ]
+}"
+01c4125a-0308-3e07-0003-9ca2003351ea	1	8	"[
+  7
+]"	SecureView	"{
+  ""output_rows"": 8349
+}"	"{
+  ""overall_percentage"": 2.380952380952381e-01,
+  ""processing"": 2.380952380952381e-01
+}"	{}
+01c4125a-0308-3e07-0003-9ca2003351ea	1	9	"[
+  6
+]"	SecureView	"{
+  ""output_rows"": 280
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	{}
+01c4125a-0308-3e07-0003-9ca2003351ea	1	10	"[
+  2
+]"	SecureView	"{
+  ""output_rows"": 45
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	{}
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	0		Result	"{
+  ""input_rows"": 50
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""expressions"": [
+    ""O.O_ORDERDATE"",
+    ""'F'"",
+    ""C.C_MKTSEGMENT"",
+    ""SUM(SUM_INTERNAL(SUM(SUM(O.O_TOTALPRICE)), COUNT(*)))"",
+    ""ANY_VALUE(ANY_VALUE(ANY_VALUE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT)))))"",
+    ""MAX(MAX(MAX(ARRAY_SIZE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT))))))""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	1	"[
+  0
+]"	Sort	"{
+  ""input_rows"": 50,
+  ""output_rows"": 50
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""sort_keys"": [
+    ""O.O_ORDERDATE ASC NULLS LAST"",
+    ""C.C_MKTSEGMENT ASC NULLS LAST""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	2	"[
+  1
+]"	Aggregate	"{
+  ""input_rows"": 400,
+  ""output_rows"": 50
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""functions"": [
+    ""SUM(SUM_INTERNAL(SUM(SUM(O.O_TOTALPRICE)), COUNT(*)))"",
+    ""ANY_VALUE(ANY_VALUE(ANY_VALUE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT)))))"",
+    ""MAX(MAX(MAX(ARRAY_SIZE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT))))))""
+  ],
+  ""grouping_keys"": [
+    ""O.O_ORDERDATE"",
+    ""C.C_MKTSEGMENT""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	3	"[
+  2
+]"	Aggregate	"{
+  ""input_rows"": 148082,
+  ""output_rows"": 400
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""functions"": [
+    ""SUM_INTERNAL(SUM(SUM(O.O_TOTALPRICE)), COUNT(*))"",
+    ""ANY_VALUE(ANY_VALUE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT))))"",
+    ""MAX(MAX(ARRAY_SIZE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT)))))""
+  ],
+  ""grouping_keys"": [
+    ""O.O_ORDERDATE"",
+    ""C.C_MKTSEGMENT""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	4	"[
+  3
+]"	Join	"{
+  ""input_rows"": 2917914,
+  ""output_rows"": 148082
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""equality_join_condition"": ""(O.O_CUSTKEY = C.C_CUSTKEY)"",
+  ""join_type"": ""INNER""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	5	"[
+  4
+]"	Aggregate	"{
+  ""input_rows"": 148082,
+  ""output_rows"": 148082
+}"	"{
+  ""overall_percentage"": 1.392757660167131e-03,
+  ""processing"": 1.392757660167131e-03
+}"	"{
+  ""functions"": [
+    ""SUM(SUM(O.O_TOTALPRICE))"",
+    ""ANY_VALUE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT)))"",
+    ""MAX(ARRAY_SIZE(ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT))))""
+  ],
+  ""grouping_keys"": [
+    ""O.O_ORDERDATE"",
+    ""O.O_CUSTKEY""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	6	"[
+  5
+]"	Join	"{
+  ""input_rows"": 52407722,
+  ""output_rows"": 148082,
+  ""spilling"": {
+    ""bytes_spilled_local_storage"": 5797490688
+  }
+}"	"{
+  ""local_disk_io"": 9.749303621169915e-03,
+  ""overall_percentage"": 1.295264623955432e-01,
+  ""processing"": 1.114206128133705e-01,
+  ""synchronization"": 8.356545961002784e-03
+}"	"{
+  ""equality_join_condition"": ""(LINEITEM.L_ORDERKEY = O.O_ORDERKEY)"",
+  ""join_type"": ""INNER""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	7	"[
+  6
+]"	Aggregate	"{
+  ""input_rows"": 77311223,
+  ""output_rows"": 50990622,
+  ""spilling"": {
+    ""bytes_spilled_local_storage"": 17223356416
+  }
+}"	"{
+  ""local_disk_io"": 3.203342618384401e-02,
+  ""overall_percentage"": 6.629526462395543e-01,
+  ""processing"": 6.253481894150418e-01,
+  ""synchronization"": 5.571030640668524e-03
+}"	"{
+  ""functions"": [
+    ""ARRAY_AGG(OBJECT_CONSTRUCT('L_ORDERKEY', LINEITEM.L_ORDERKEY, 'L_PARTKEY', LINEITEM.L_PARTKEY, 'L_SUPPKEY', LINEITEM.L_SUPPKEY, 'L_LINENUMBER', LINEITEM.L_LINENUMBER, 'L_QUANTITY', LINEITEM.L_QUANTITY, 'L_EXTENDEDPRICE', LINEITEM.L_EXTENDEDPRICE, 'L_DISCOUNT', LINEITEM.L_DISCOUNT, 'L_TAX', LINEITEM.L_TAX, 'L_RETURNFLAG', LINEITEM.L_RETURNFLAG, 'L_LINESTATUS', LINEITEM.L_LINESTATUS, 'L_SHIPDATE', LINEITEM.L_SHIPDATE, 'L_COMMITDATE', LINEITEM.L_COMMITDATE, 'L_RECEIPTDATE', LINEITEM.L_RECEIPTDATE, 'L_SHIPINSTRUCT', LINEITEM.L_SHIPINSTRUCT, 'L_SHIPMODE', LINEITEM.L_SHIPMODE, 'L_COMMENT', LINEITEM.L_COMMENT))""
+  ],
+  ""grouping_keys"": [
+    ""LINEITEM.L_ORDERKEY""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	8	"[
+  7
+]"	Filter	"{
+  ""input_rows"": 77311223,
+  ""output_rows"": 77311223
+}"	"{
+  ""overall_percentage"": 3.064066852367688e-02,
+  ""processing"": 2.924791086350975e-02,
+  ""synchronization"": 1.392757660167131e-03
+}"	"{
+  ""filter_condition"": ""(LINEITEM.L_RECEIPTDATE >= '1992-10-01') AND (LINEITEM.L_RECEIPTDATE < '1992-11-01')""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	9	"[
+  8
+]"	TableScan	"{
+  ""io"": {
+    ""bytes_scanned"": 4300355424,
+    ""percentage_scanned_from_cache"": 0,
+    ""scan_progress"": 1
+  },
+  ""output_rows"": 77311223,
+  ""pruning"": {
+    ""partitions_scanned"": 258,
+    ""partitions_total"": 10336
+  }
+}"	"{
+  ""local_disk_io"": 1.392757660167131e-03,
+  ""overall_percentage"": 1.155988857938719e-01,
+  ""processing"": 4.038997214484680e-02,
+  ""remote_disk_io"": 7.242339832869081e-02,
+  ""synchronization"": 1.392757660167131e-03
+}"	"{
+  ""columns"": [
+    ""L_ORDERKEY"",
+    ""L_PARTKEY"",
+    ""L_SUPPKEY"",
+    ""L_LINENUMBER"",
+    ""L_QUANTITY"",
+    ""L_EXTENDEDPRICE"",
+    ""L_DISCOUNT"",
+    ""L_TAX"",
+    ""L_RETURNFLAG"",
+    ""L_LINESTATUS"",
+    ""L_SHIPDATE"",
+    ""L_COMMITDATE"",
+    ""L_RECEIPTDATE"",
+    ""L_SHIPINSTRUCT"",
+    ""L_SHIPMODE"",
+    ""L_COMMENT""
+  ],
+  ""table_name"": ""SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.LINEITEM""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	10	"[
+  6
+]"	Aggregate	"{
+  ""input_rows"": 1417100,
+  ""output_rows"": 1417100
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""functions"": [
+    ""SUM(O.O_TOTALPRICE)""
+  ],
+  ""grouping_keys"": [
+    ""O.O_ORDERDATE"",
+    ""O.O_CUSTKEY"",
+    ""O.O_ORDERKEY""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	11	"[
+  10
+]"	Filter	"{
+  ""input_rows"": 1417100,
+  ""output_rows"": 1417100
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""filter_condition"": ""(O.O_ORDERDATE >= '1992-10-20') AND (O.O_ORDERDATE < '1992-11-01')""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	12	"[
+  11
+]"	JoinFilter	"{
+  ""input_rows"": 1417100,
+  ""output_rows"": 1417100
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""join_id"": ""6""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	13	"[
+  12
+]"	TableScan	"{
+  ""io"": {
+    ""bytes_scanned"": 90342736,
+    ""percentage_scanned_from_cache"": 0,
+    ""scan_progress"": 1
+  },
+  ""output_rows"": 1417100,
+  ""pruning"": {
+    ""partitions_scanned"": 17,
+    ""partitions_total"": 3242
+  }
+}"	"{
+  ""overall_percentage"": 0.000000000000000e+00
+}"	"{
+  ""columns"": [
+    ""O_ORDERKEY"",
+    ""O_CUSTKEY"",
+    ""O_TOTALPRICE"",
+    ""O_ORDERDATE""
+  ],
+  ""table_alias"": ""O"",
+  ""table_name"": ""SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.ORDERS""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	14	"[
+  4
+]"	Aggregate	"{
+  ""input_rows"": 2769832,
+  ""output_rows"": 2769832
+}"	"{
+  ""overall_percentage"": 1.392757660167131e-03,
+  ""processing"": 1.392757660167131e-03
+}"	"{
+  ""functions"": [
+    ""COUNT(*)""
+  ],
+  ""grouping_keys"": [
+    ""C.C_MKTSEGMENT"",
+    ""C.C_CUSTKEY""
+  ]
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	15	"[
+  14
+]"	JoinFilter	"{
+  ""input_rows"": 2769832,
+  ""output_rows"": 2769832
+}"	"{
+  ""overall_percentage"": 4.178272980501393e-03,
+  ""processing"": 4.178272980501393e-03
+}"	"{
+  ""join_id"": ""4""
+}"
+01c405c9-0108-3a10-0003-9ca20030b0fa	1	16	"[
+  15
+]"	TableScan	"{
+  ""io"": {
+    ""bytes_scanned"": 563608816,
+    ""percentage_scanned_from_cache"": 0,
+    ""scan_progress"": 1
+  },
+  ""output_rows"": 2769832,
+  ""pruning"": {
+    ""partitions_scanned"": 667,
+    ""partitions_total"": 667
+  }
+}"	"{
+  ""local_disk_io"": 1.392757660167131e-03,
+  ""overall_percentage"": 5.153203342618384e-02,
+  ""processing"": 4.178272980501393e-03,
+  ""remote_disk_io"": 4.596100278551532e-02
+}"	"{
+  ""columns"": [
+    ""C_CUSTKEY"",
+    ""C_MKTSEGMENT""
+  ],
+  ""table_alias"": ""C"",
+  ""table_name"": ""SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.CUSTOMER""
+}"

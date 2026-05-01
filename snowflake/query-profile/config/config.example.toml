@@ -1,0 +1,31 @@
+# config.example.toml — copy to config.toml and fill in your values.
+# Environment variables override every key below (see config.py _ENV_MAP).
+
+[snowflake]
+account  = "myorg-myaccount"   # SNOWFLAKE_ACCOUNT  — e.g. "https://myorg-myaccount.snowflakecomputing.com"
+user     = "SVC_QOS"           # SNOWFLAKE_USER
+role     = "DOI_ROLE"          # SNOWFLAKE_ROLE     — optional; omit to use default role
+warehouse = "DOI_WH"           # SNOWFLAKE_WAREHOUSE
+
+database = "OBSERVABILITY"     # SNOWFLAKE_DATABASE
+schema   = "DATA"              # SNOWFLAKE_SCHEMA
+
+# Key-pair auth (recommended for service accounts).
+# Leave blank and set password instead if using password auth.
+private_key_path       = "/secrets/rsa_key.p8"  # SNOWFLAKE_PRIVATE_KEY_PATH
+private_key_passphrase = ""                      # SNOWFLAKE_PRIVATE_KEY_PASSPHRASE
+
+# Password auth (alternative — do not set alongside private_key_path).
+# password = "hunter2"                           # SNOWFLAKE_PASSWORD
+
+[target]
+table = "DB.SCHEMA.QUERY_OPERATOR_STATS_HISTORY"  # QOS_TARGET_TABLE
+stage = "DB.SCHEMA.QUERY_OPERATOR_STATS_STAGE"    # QOS_TARGET_STAGE
+
+[pipeline]
+lookback_hours      = 4       # QOS_LOOKBACK_HOURS       — how far back to scan QUERY_HISTORY
+min_execute_seconds = 60      # QOS_MIN_EXECUTE_SECONDS  — skip queries shorter than this
+workers             = 8       # QOS_WORKERS              — max concurrent async queries
+max_queries_per_run = 100000  # QOS_MAX_QUERIES_PER_RUN  — safety cap per invocation
+scratch_dir         = "/tmp/query_operator_stats"  # QOS_SCRATCH_DIR
+log_level           = "INFO"  # QOS_LOG_LEVEL            — DEBUG | INFO | WARNING | ERROR
