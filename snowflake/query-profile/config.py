@@ -50,9 +50,9 @@ class TargetConfig:
 @dataclass
 class PipelineConfig:
     lookback_hours: int = 4
-    min_execute_minutes: int = 10
+    min_execute_seconds: int = 60
     workers: int = 8
-    max_queries_per_run: int = 5000
+    max_queries_per_run: int = 100000
     scratch_dir: str = "/tmp/query_operator_stats"
     log_level: str = "INFO"
 
@@ -80,7 +80,7 @@ _ENV_MAP: dict[tuple[str, str], str] = {
     ("target", "table"): "QOS_TARGET_TABLE",
     ("target", "stage"): "QOS_TARGET_STAGE",
     ("pipeline", "lookback_hours"): "QOS_LOOKBACK_HOURS",
-    ("pipeline", "min_execute_minutes"): "QOS_MIN_EXECUTE_MINUTES",
+    ("pipeline", "min_execute_seconds"): "QOS_MIN_EXECUTE_SECONDS",
     ("pipeline", "workers"): "QOS_WORKERS",
     ("pipeline", "max_queries_per_run"): "QOS_MAX_QUERIES_PER_RUN",
     ("pipeline", "scratch_dir"): "QOS_SCRATCH_DIR",
@@ -89,7 +89,7 @@ _ENV_MAP: dict[tuple[str, str], str] = {
 
 _INT_FIELDS = {
     "lookback_hours",
-    "min_execute_minutes",
+    "min_execute_seconds",
     "workers",
     "max_queries_per_run",
 }

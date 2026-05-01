@@ -26,7 +26,9 @@ Earlier iterations used one connection per worker thread. That works, but is was
 - **Shard buffer writes are under `asyncio.Lock()`.** Coroutines in a single event loop are cooperative, but any `await` inside `_extract_one` is a yield point, so `.rows.extend()` + `.queries_succeeded += 1` must be guarded to avoid interleaving.
 - **Round-robin into N shards, NOT one file per query.** `GET_QUERY_OPERATOR_STATS` returns 20-200 rows per query. One file per query would re-create the small-file problem we designed around. Each Parquet row group can pack 1000~5000 rows, once a row group has accumulated enough rows within a given worker shard, that row group will be flush to the Parquet file. Multiple workers can obtain the lock and flush into a single Parquet file.
 - **Arrow schema in `parquet_writer.py` must match `sql/001_create_target_table.sql` exactly.** If you change one, change both — and update the `$1:<field>` projection inside `_COPY_SQL` in `snowflake_io.py`.
+- Due to some data type conversion caveat between Snowflake and Python, need to log the schema of the recordset of Snowflake cursor when the very first chunk is returned
 - https://docs.snowflake.com/en/sql-reference/functions/get_query_operator_stats has all info about `Key`, `Data Type` and `Description` for the top-level JSON fields such as OPERATOR_ATTRIBUTES and OPERATOR_STATISTICS. We will add the Keys into the Parquet field description for the same nested Key which we flatten/shred into <parent_key>$<nested_key>.
+- Everything inside `EXECUTION_TIME_BREAKDOWN` needs to be shredded. `OPERATOR_STATISTICS` and `OPERATOR_ATTRIBUTES` will be partially shredded.
 - For those shredded/flatterned keys, use OBJECT_DELETE() to remove them from the VARIANT output fields
 - **`OPERATOR_ATTRIBUTES` is VARIANT in Snowflake but serialized as a JSON string in Parquet.** The COPY uses `TRY_PARSE_JSON` to convert back. Don't try to store it as a Parquet struct — Snowflake's Parquet VARIANT ingest is finicky and the JSON-string path is the reliable one.
 - **PUT uses `AUTO_COMPRESS=FALSE`** because Parquet files are already SNAPPY-compressed. Auto-compress wraps them in gzip and breaks Parquet parsing on COPY.
@@ -59,8 +61,10 @@ Tests in `tests/` cover pure-Python logic only (config loading, Parquet schema r
 
 ```bash
 pip install -e .[dev]
-cp config/config.example.toml config/config.toml  # then edit
-python -m query_operator_stats --dry-run          # lists candidates only
-python -m query_operator_stats --workers 8        # full run
+cp config/config.example.toml config/config.toml               # then edit
+python __main__.py --config /path/to/config.toml --dry-run     # lists candidates only
+python __main__.py --workers 8                                 # full run
 pytest -v
 ```
+
+Source files live in the project root (not inside `query_operator_stats/`), so they must be run as scripts (`python __main__.py`) rather than as a package (`python -m`). All inter-module imports are absolute so the current working directory must be the project root.

@@ -10,7 +10,7 @@ import snowflake.connector
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-from .config import Config
+from config import Config
 
 log = logging.getLogger(__name__)
 
@@ -53,6 +53,19 @@ def connect(cfg: Config) -> snowflake.connector.SnowflakeConnection:
     return snowflake.connector.connect(**{k: v for k, v in kwargs.items() if v is not None})
 
 
+_SESSION_INFO_SQL = """SELECT SESSION_ID, CLIENT_APPLICATION_ID, CLIENT_ENVIRONMENT
+FROM SNOWFLAKE.ACCOUNT_USAGE.SESSIONS WHERE SESSION_ID = CURRENT_SESSION()
+"""
+
+def get_session_info(
+    conn: snowflake.connector.SnowflakeConnection,
+) -> list[dict[str, Any]]:
+    with conn.cursor(snowflake.connector.DictCursor) as cur:
+        cur.execute(_SESSION_INFO_SQL)
+        row = cur.fetchone()
+    return row
+
+
 # ---------------------------------------------------------------------------
 # Step 1: candidate listing
 # ---------------------------------------------------------------------------
@@ -74,21 +87,22 @@ LIMIT %(limit)s
 """
 
 
+
 def list_candidate_queries(
     conn: snowflake.connector.SnowflakeConnection,
     cfg: Config,
 ) -> list[dict[str, Any]]:
     """Return the list of QUERY_IDs that are long-running and not yet extracted."""
     params = {
-        "min_ms": cfg.pipeline.min_execute_minutes * 60 * 1000,
+        "min_ms": cfg.pipeline.min_execute_seconds * 1000,
         "lookback_hours": cfg.pipeline.lookback_hours,
         "target_table": cfg.target.table,
         "limit": cfg.pipeline.max_queries_per_run,
     }
     log.info(
-        "listing candidates: lookback=%sh min_execute=%smin cap=%s",
+        "listing candidates: lookback=%sh min_execute=%ss cap=%s",
         cfg.pipeline.lookback_hours,
-        cfg.pipeline.min_execute_minutes,
+        cfg.pipeline.min_execute_seconds,
         cfg.pipeline.max_queries_per_run,
     )
     with conn.cursor(snowflake.connector.DictCursor) as cur:
@@ -128,13 +142,29 @@ def put_shards_to_stage(
 _COPY_SQL = """
 COPY INTO IDENTIFIER(%(target_table)s)
     (QUERY_ID, QUERY_TAG, START_TIME, END_TIME, EXECUTION_TIME,
-     STEP_ID, OPERATOR_ID, PARENT_OPERATOR_ID, OPERATOR_TYPE,
-     EXECUTION_TIME$OVERALL_PERCENTAGE, EXECUTION_TIME$LOCAL_DISK_IO,
+     STEP_ID, OPERATOR_ID, PARENT_OPERATORS, OPERATOR_TYPE,
+     EXECUTION_TIME$OVERALL_PERCENTAGE, EXECUTION_TIME$INITIALIZATION,
+     EXECUTION_TIME$PROCESSING, EXECUTION_TIME$SYNCHRONIZATION,
+     EXECUTION_TIME$LOCAL_DISK_IO, EXECUTION_TIME$REMOTE_DISK_IO,
      EXECUTION_TIME$NETWORK_COMMUNICATION,
      OPERATOR_STATS$INPUT_ROWS, OPERATOR_STATS$OUTPUT_ROWS,
      OPERATOR_STATS$NETWORK_BYTES,
      OPERATOR_STATS$BYTES_SPILLED_LOCAL_STORAGE,
      OPERATOR_STATS$BYTES_SPILLED_REMOTE_STORAGE,
+     OPERATOR_STATS$BYTES_SCANNED, OPERATOR_STATS$BYTES_WRITTEN,
+     OPERATOR_STATS$BYTES_WRITTEN_TO_RESULT,
+     OPERATOR_STATS$PARTITIONS_SCANNED, OPERATOR_STATS$PARTITIONS_TOTAL,
+     OPERATOR_ATTRS$GROUPING_KEYS,
+     OPERATOR_ATTRS$JOIN_TYPE,
+     OPERATOR_ATTRS$EQUALITY_JOIN_CONDITION,
+     OPERATOR_ATTRS$ADDITIONAL_JOIN_CONDITION,
+     OPERATOR_ATTRS$TABLE_NAME,
+     OPERATOR_ATTRS$FILTER_CONDITION,
+     OPERATOR_ATTRS$JOIN_ID,
+     OPERATOR_ATTRS$COLUMNS,
+     OPERATOR_ATTRS$EXPRESSIONS,
+     OPERATOR_ATTRS$FUNCTIONS,
+     OPERATOR_STATISTICS,
      OPERATOR_ATTRIBUTES)
 FROM (
     SELECT
@@ -145,16 +175,36 @@ FROM (
         $1:execution_time::int,
         $1:step_id::int,
         $1:operator_id::int,
-        $1:parent_operator_id::int,
+        $1:parent_operators::ARRAY(INT),
         $1:operator_type::string,
         $1:"execution_time$overall_percentage"::float,
+        $1:"execution_time$initialization"::float,
+        $1:"execution_time$processing"::float,
+        $1:"execution_time$synchronization"::float,
         $1:"execution_time$local_disk_io"::float,
+        $1:"execution_time$remote_disk_io"::float,
         $1:"execution_time$network_communication"::float,
         $1:"operator_stats$input_rows"::int,
         $1:"operator_stats$output_rows"::int,
         $1:"operator_stats$network_bytes"::int,
         $1:"operator_stats$bytes_spilled_local_storage"::int,
         $1:"operator_stats$bytes_spilled_remote_storage"::int,
+        $1:"operator_stats$bytes_scanned"::int,
+        $1:"operator_stats$bytes_written"::int,
+        $1:"operator_stats$bytes_written_to_result"::int,
+        $1:"operator_stats$partitions_scanned"::int,
+        $1:"operator_stats$partitions_total"::int,
+        $1:"operator_attrs$grouping_keys"::ARRAY(VARCHAR),
+        $1:"operator_attrs$join_type"::string,
+        $1:"operator_attrs$equality_join_condition"::string,
+        $1:"operator_attrs$additional_join_condition"::string,
+        $1:"operator_attrs$table_name"::string,
+        $1:"operator_attrs$filter_condition"::string,
+        $1:"operator_attrs$join_id"::int,
+        $1:"operator_attrs$columns"::ARRAY(VARCHAR),
+        $1:"operator_attrs$expressions"::ARRAY(VARCHAR),
+        $1:"operator_attrs$functions"::ARRAY(VARCHAR),
+        TRY_PARSE_JSON($1:operator_statistics::string),
         TRY_PARSE_JSON($1:operator_attributes::string)
     FROM @{stage}
 )

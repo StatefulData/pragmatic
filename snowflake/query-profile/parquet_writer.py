@@ -29,19 +29,69 @@ ARROW_SCHEMA = pa.schema([
     pa.field("execution_time", pa.int64()),
     pa.field("step_id", pa.int32()),
     pa.field("operator_id", pa.int32()),
-    pa.field("parent_operator_id", pa.int32()),
+    pa.field("parent_operators", pa.list_(pa.int32())),
     pa.field("operator_type", pa.string()),
+    # EXECUTION_TIME_BREAKDOWN shreds
     pa.field("execution_time$overall_percentage", pa.float64()),
+    pa.field("execution_time$initialization", pa.float64()),
+    pa.field("execution_time$processing", pa.float64()),
+    pa.field("execution_time$synchronization", pa.float64()),
     pa.field("execution_time$local_disk_io", pa.float64()),
+    pa.field("execution_time$remote_disk_io", pa.float64()),
     pa.field("execution_time$network_communication", pa.float64()),
+    # OPERATOR_STATISTICS shreds
     pa.field("operator_stats$input_rows", pa.int64()),
     pa.field("operator_stats$output_rows", pa.int64()),
     pa.field("operator_stats$network_bytes", pa.int64()),
     pa.field("operator_stats$bytes_spilled_local_storage", pa.int64()),
     pa.field("operator_stats$bytes_spilled_remote_storage", pa.int64()),
-    # VARIANT on the Snowflake side — serialize as JSON string here.
+    pa.field("operator_stats$bytes_scanned", pa.int64()),
+    pa.field("operator_stats$bytes_written", pa.int64()),
+    pa.field("operator_stats$bytes_written_to_result", pa.int64()),
+    pa.field("operator_stats$partitions_scanned", pa.int64()),
+    pa.field("operator_stats$partitions_total", pa.int64()),
+    # OPERATOR_ATTRIBUTES shreds
+    pa.field("operator_attrs$grouping_keys", pa.list_(pa.string())),
+    pa.field("operator_attrs$join_type", pa.string()),
+    pa.field("operator_attrs$equality_join_condition", pa.string()),
+    pa.field("operator_attrs$additional_join_condition", pa.string()),
+    pa.field("operator_attrs$table_name", pa.string()),
+    pa.field("operator_attrs$filter_condition", pa.string()),
+    pa.field("operator_attrs$join_id", pa.int32()),
+    pa.field("operator_attrs$columns", pa.list_(pa.string())),
+    pa.field("operator_attrs$expressions", pa.list_(pa.string())),
+    pa.field("operator_attrs$functions", pa.list_(pa.string())),
+    # VARIANT remainders after OBJECT_DELETE — serialized as JSON strings till we can use VARIANT.
+    pa.field("operator_statistics", pa.string()),
     pa.field("operator_attributes", pa.string()),
 ])
+
+
+def _coerce_column(values: list[Any], arrow_type: pa.DataType) -> list[Any]:
+    """Normalise a column's values to match arrow_type.
+
+    The Snowflake connector can return numeric columns as Python strings
+    (e.g. '6' instead of 6) depending on connector version and session
+    settings. PyArrow refuses to cast str → int32/int64/float64, so we
+    coerce here, driven entirely by the schema so new fields are covered
+    automatically.
+    """
+    if pa.types.is_integer(arrow_type):
+        return [None if v is None else int(v) for v in values]
+    if pa.types.is_floating(arrow_type):
+        return [None if v is None else float(v) for v in values]
+    if pa.types.is_list(arrow_type) and pa.types.is_integer(arrow_type.value_type):
+        # list_(int32): each element may arrive as a string
+        result: list[Any] = []
+        for v in values:
+            if v is None:
+                result.append(None)
+            elif isinstance(v, list):
+                result.append([None if x is None else int(x) for x in v])
+            else:
+                result.append(None)
+        return result
+    return values
 
 
 def rows_to_table(rows: list[dict[str, Any]]) -> pa.Table:
@@ -49,13 +99,17 @@ def rows_to_table(rows: list[dict[str, Any]]) -> pa.Table:
     if not rows:
         return ARROW_SCHEMA.empty_table()
 
+    _JSON_FIELDS = {"operator_statistics", "operator_attributes"}
     columns: dict[str, list[Any]] = {f.name: [] for f in ARROW_SCHEMA}
     for row in rows:
         for name in columns:
             val = row.get(name)
-            if name == "operator_attributes" and val is not None and not isinstance(val, str):
+            if name in _JSON_FIELDS and val is not None and not isinstance(val, str):
                 val = json.dumps(val, default=str)
             columns[name].append(val)
+
+    # Coerce numeric columns that the connector returned as strings.
+    columns = {f.name: _coerce_column(columns[f.name], f.type) for f in ARROW_SCHEMA}
 
     return pa.Table.from_pydict(columns, schema=ARROW_SCHEMA)
 

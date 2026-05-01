@@ -6,8 +6,8 @@ import argparse
 import logging
 import sys
 
-from .config import load_config
-from .pipeline import run
+from config import load_config
+from pipeline import run
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -17,7 +17,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument("--config", help="Path to config.toml (default: auto-discover)")
     p.add_argument("--lookback-hours", type=int, help="Override pipeline.lookback_hours")
-    p.add_argument("--min-execute-minutes", type=int, help="Override pipeline.min_execute_minutes")
+    p.add_argument("--min-execute-seconds", type=int, help="Override pipeline.min_execute_seconds")
     p.add_argument("--workers", type=int, help="Override pipeline.workers")
     p.add_argument("--max-queries", type=int, help="Override pipeline.max_queries_per_run")
     p.add_argument("--log-level", help="DEBUG|INFO|WARNING|ERROR")
@@ -33,8 +33,8 @@ def main(argv: list[str] | None = None) -> int:
     # Apply CLI overrides (highest precedence).
     if args.lookback_hours is not None:
         cfg.pipeline.lookback_hours = args.lookback_hours
-    if args.min_execute_minutes is not None:
-        cfg.pipeline.min_execute_minutes = args.min_execute_minutes
+    if args.min_execute_seconds is not None:
+        cfg.pipeline.min_execute_seconds = args.min_execute_seconds
     if args.workers is not None:
         cfg.pipeline.workers = args.workers
     if args.max_queries is not None:
@@ -48,7 +48,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     if args.dry_run:
-        from .snowflake_io import connect, list_candidate_queries
+        from snowflake_io import connect, list_candidate_queries
         conn = connect(cfg)
         try:
             rows = list_candidate_queries(conn, cfg)
