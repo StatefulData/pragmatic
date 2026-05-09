@@ -40,6 +40,7 @@ Caveats
 from __future__ import annotations
 
 import asyncio
+import datetime
 import json
 import logging
 import time
@@ -115,8 +116,8 @@ def _coerce_int_list(val: Any) -> list[int] | None:
 class CandidateQuery:
     query_id: str
     query_tag: str | None
-    start_time: Any
-    end_time: Any
+    start_time: datetime
+    end_time: datetime
     execution_time: int
 
 

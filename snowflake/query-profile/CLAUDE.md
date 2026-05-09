@@ -45,6 +45,7 @@ Earlier iterations used one connection per worker thread. That works, but is was
 - Polling uses fixed exponential backoff. For a bimodal workload (many fast queries + a few slow ones), an adaptive heuristic (track per-query observed runtime) would reduce poll count, but isn't worth the complexity until profiling shows it matters.
 - No metrics emission — `PipelineReport` is returned but not exported. OTel or StatsD is a natural add.
 - The stored procedure in `sql/GET_EXPENSIVE_QUERY_OPERATOR_STATS.sql` is kept for reference and for users who prefer a pure-SQL deployment. It is **not** invoked by this module.
+- `USE_LOGICAL_TYPE = TRUE` must be specified for `COPY INTO` or `CREATE FILE FORMAT`, otherwise Snowflake may treate TIMESTAMP fields in Parquet files as Epoch Second blindly.
 
 ## Don'ts
 
