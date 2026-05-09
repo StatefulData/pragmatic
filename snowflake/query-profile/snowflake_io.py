@@ -136,6 +136,7 @@ def put_shards_to_stage(
             sql = f"PUT '{uri}' @{stage} AUTO_COMPRESS=FALSE OVERWRITE=TRUE"
             log.debug("PUT %s", uri)
             cur.execute(sql)
+        log.info(cur.execute(f"LIST @{stage}").fetchall())
     log.info("uploaded %d shard(s) to @%s", len(shard_paths), stage)
 
 
@@ -208,7 +209,7 @@ FROM (
         TRY_PARSE_JSON($1:operator_attributes::string)
     FROM @{stage}
 )
-FILE_FORMAT = (TYPE = PARQUET)
+FILE_FORMAT = (TYPE = PARQUET USE_LOGICAL_TYPE = TRUE)
 ON_ERROR = 'ABORT_STATEMENT'
 PURGE = TRUE
 """
