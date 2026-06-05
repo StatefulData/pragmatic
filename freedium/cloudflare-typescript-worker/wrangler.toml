@@ -1,0 +1,38 @@
+name            = "medium-proxy-worker"
+main            = "src/index.ts"
+compatibility_date  = "2025-09-15"
+compatibility_flags = ["nodejs_compat"]
+
+# ── KV: hot article cache (TTL-based, edge-local reads) ─────────────────────
+# wrangler kv:namespace create ARTICLE_CACHE
+# wrangler kv:namespace create ARTICLE_CACHE --preview
+kv_namespaces = [
+  { binding = "ARTICLE_CACHE", id = "YOUR_KV_NAMESPACE_ID", preview_id = "YOUR_KV_PREVIEW_ID" }
+]
+
+# ── D1: cold persistent store (article metadata + gzip Paragraph[] content) ─
+# wrangler d1 create medium-proxy-db
+# Then paste the database_id below and run: npm run migrate
+[[d1_databases]]
+binding      = "DB"
+database_name = "medium-proxy-db"
+database_id  = "YOUR_D1_DATABASE_ID"
+
+# ── Vars ─────────────────────────────────────────────────────────────────────
+[vars]
+# KV TTL — how long a parsed article lives in the hot cache before D1 re-serves it
+KV_TTL_SECONDS   = "3600"
+LOG_LEVEL        = "info"     # debug | info | warn | error
+
+# ── Secrets — set via: wrangler secret put <NAME> ────────────────────────────
+# MEDIUM_COOKIES  = "uid=...; sid=..."
+# ADMIN_TOKENS    = "token1,token2"   (optional, for /api/cache/purge)
+
+[build]
+command = "npm run typecheck"
+
+[env.dev]
+vars = { LOG_LEVEL = "debug", KV_TTL_SECONDS = "120" }
+
+[env.production]
+vars = { LOG_LEVEL = "warn",  KV_TTL_SECONDS = "7200" }

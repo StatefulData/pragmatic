@@ -1,0 +1,19 @@
+{
+  "name": "medium-proxy-worker",
+  "version": "3.0.0",
+  "description": "TypeScript Cloudflare Worker — Medium proxy. KV hot-cache + D1 cold-store (gzip-compressed Paragraph[] JSON). HTML, Markdown, JSON output.",
+  "scripts": {
+    "dev":       "wrangler dev",
+    "deploy":    "wrangler deploy",
+    "test":      "vitest run",
+    "test:watch":"vitest",
+    "typecheck": "tsc --noEmit",
+    "migrate":   "wrangler d1 migrations apply medium-proxy-db"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240529.0",
+    "typescript":  "^5.4.5",
+    "vitest":      "^1.6.0",
+    "wrangler":    "^3.60.0"
+  }
+}
